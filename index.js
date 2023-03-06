@@ -142,7 +142,7 @@ ipaddr.IPv4.getNextIpAddress = (ipAddress, step = 1) => {
 // -----------------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------------
 // 分割前のネットワークアドレスを生成
-const networkPrefix = Math.randBetween(22, 25); 
+const networkPrefix = Math.randBetween(22, 25);
 console.info("network(origin) prefix", "Ready");
 
 // プライベートIPアドレスを決定
@@ -158,7 +158,7 @@ console.info("subnetwork count", "Ready");
 const subnetworkRequirementList = Array.from(new Array(subNetworkCount), (_, i) => {
     let hostCount;
     return {
-        subnetName: `サブネット${"ABCDEFGH"[i]}`,// サブネットの名前
+        subnetName: `サブネット${"ABCDEFGHIJKLMLOPQRSTU"[i]}`,// サブネットの名前
         hostCount: (hostCount = Math.randBetween(2,
             (
                 2 ** (32 - (
