@@ -1,0 +1,14 @@
+{
+  "name": "vlsm_auto_learning",
+  "version": "1.0.0",
+  "description": "IPv4 and IPv6 addressing learning tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "dependencies": {
+    "ipaddr.js": "^2.0.1"
+  }
+}
