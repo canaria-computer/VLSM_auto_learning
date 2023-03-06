@@ -142,8 +142,7 @@ ipaddr.IPv4.getNextIpAddress = (ipAddress, step = 1) => {
 // -----------------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------------
 // 分割前のネットワークアドレスを生成
-// const networkPrefix = Math.randBetween(22, 25); // TODO 本番用
-const networkPrefix = 23; // TODO : 本番は削除
+const networkPrefix = Math.randBetween(22, 25); 
 console.info("network(origin) prefix", "Ready");
 
 // プライベートIPアドレスを決定
