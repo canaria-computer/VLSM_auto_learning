@@ -12,15 +12,19 @@ Math.randBetween = (start = 0, end = 1) => {
 /**
  * 入力値の2のべき乗の指数を求める
  * @param {number} n 入力値
- * @returns {number}2のべき乗の指数
+ * @returns {number} 2のべき乗の指数
+ * @throws {Error} 整数以外の値が入力された場合にエラーをスローします
  */
 Math.getPowerOfTwo = (n) => {
+    if (!Number.isInteger(n) || n <= 0) {
+        throw new Error("Invalid input: must be a positive integer");
+    }
     let power = 0;
     while (Math.pow(2, power) < n) {
         power++;
     }
     return power;
-}
+};
 
 
 const determinePrivateIPv4Address = () => {
@@ -38,8 +42,8 @@ const determinePrivateIPv4Address = () => {
             ipv4Address = `192.168.${Math.randBetween(0, 255)}.${Math.randBetween(0, 255)}`
             break;
     }
-    return ipv4Address;
-}
+    return ipaddr.IPv4.networkAddressFromCIDR(`${ipv4Address}/${networkPrefix}`).toString();
+};
 /**
  * サブネットワークの数をランダムに決定する
  * @param {number} prefix (オリジン)ネットワークのプレフィックス
@@ -50,9 +54,96 @@ const subNetworkCountDetermining = (prefix) => {
     return Math.randBetween(2, hostBitLength);
 };
 
+/**
+ * サブネットワーク計画に基づいてサブネット化を実行する
+ * @param {Array} subNetworkPlan 
+ * @returns {object}
+ */
+const generationAnswer = (subNetworkPlan) => {
+    const sortedSubnetworkRequirementList = subNetworkPlan.slice().sort((a, b) => {
+        return b.hostCount - a.hostCount;
+    });
+    // 次の隣接するアドレス
+    let nextSubNetAddress = networkAddress;//初期値はネットワークアドレスアドレス
+    let count = 0;
+    // 繰り返し処理
+    for (let i = 0; i < sortedSubnetworkRequirementList.length; i++) {
+        const subnetInfo = sortedSubnetworkRequirementList[i]
+        sortedSubnetworkRequirementList[i].plefixLength = ipaddr.IPv4.calculatePrefixLength(subnetInfo.hostCount);
+        sortedSubnetworkRequirementList[i].addressAndCIDR = `${nextSubNetAddress}/${sortedSubnetworkRequirementList[i].plefixLength}`;// * NW アドレス
+        sortedSubnetworkRequirementList[i].subnetMask = ipaddr.IPv4.subnetMaskFromPrefixLength(sortedSubnetworkRequirementList[i].plefixLength).toString();// * サブネットマスク
+        sortedSubnetworkRequirementList[i].binarySubnetMask = ipaddr.IPv4.subnetMaskFromPrefixLength(sortedSubnetworkRequirementList[i].plefixLength).toByteArray().map(b => b.toString(2)).join(".");//2進数 サブネットマスク
+        sortedSubnetworkRequirementList[i].firstHostAddress = ipaddr.IPv4.getFirstHostAddress(sortedSubnetworkRequirementList[i].addressAndCIDR) + `/${sortedSubnetworkRequirementList[i].plefixLength}`// 最初のホストアドレス
+        sortedSubnetworkRequirementList[i].lastHostAddress = ipaddr.IPv4.getLastHostAddress(sortedSubnetworkRequirementList[i].addressAndCIDR) + `/${sortedSubnetworkRequirementList[i].plefixLength}`//最後のホストアドレス
+        sortedSubnetworkRequirementList[i].broadcastAddress = ipaddr.IPv4.broadcastAddressFromCIDR(sortedSubnetworkRequirementList[i].addressAndCIDR) + `/${sortedSubnetworkRequirementList[i].plefixLength}`// ブロードキャストアドレス
+        sortedSubnetworkRequirementList[i].availableSubnetworkMaxCount = 2 ** (sortedSubnetworkRequirementList[i].plefixLength - networkPrefix);// * このサブネットマスクで作れる最大のサブネットワークの数
+        sortedSubnetworkRequirementList[i].switchIPAddress = sortedSubnetworkRequirementList[i].AreSwitcheInSubnetwork ? ipaddr.IPv4.getNextIpAddress(sortedSubnetworkRequirementList[i].broadcastAddress.split("/")[0], -2) : null;//スイッチのアドレス
+        nextSubNetAddress = ipaddr.IPv4.getNextIpAddress(sortedSubnetworkRequirementList[i].broadcastAddress.split("/")[0]);// * 次のネットワークのアドレス
+    }
+    // サブネットマスクの決定
+    console.table(sortedSubnetworkRequirementList)
+    return sortedSubnetworkRequirementList;
+};
+// プレフィックス長を求めるプログラムを追加する
+/**
+ * ホストの台数からプレフィックス長を求める
+ * @param {number} hosts ホストの台数
+ * @returns プレフィックス長
+ */
+ipaddr.IPv4.calculatePrefixLength = (hosts) => {
+    if (isNaN(hosts) || hosts < 0 || hosts > Math.pow(2, 32) - 2) {
+        throw new Error("Invalid input: must be a positive integer less than or equal to " + (Math.pow(2, 32) - 2));
+    }
+    return 32 - Math.getPowerOfTwo(hosts + 2);
+};
+/**
+ * 最初のホストアドレスを求める
+ * @param {number} IPv4Address_CIDR IPv4アドレスプレフィックス長CIDR表記つき
+ * @returns {string} 最後の
+ */
+ipaddr.IPv4.getFirstHostAddress = (IPv4Address_CIDR) => {
+    const parsedAddress = ipaddr.IPv4.networkAddressFromCIDR(IPv4Address_CIDR);
+    let bytes = parsedAddress.toByteArray();
+    bytes[bytes.length - 1] += 1
+    return ipaddr.fromByteArray(bytes).toString();
+};
+/**
+ * 最後のホストアドレスを求める
+ * @param {string} IPv4Address IPv4 address string (CIDR付き)
+ * @param {number} prefixLen prefix Length
+ * @returns LastHostAddress String
+ */
+ipaddr.IPv4.getLastHostAddress = (IPv4Address_CIDR) => {
+    const parsedAddress = ipaddr.IPv4.broadcastAddressFromCIDR(IPv4Address_CIDR);
+    let bytes = parsedAddress.toByteArray();
+    bytes[bytes.length - 1] -= 1
+    return ipaddr.fromByteArray(bytes).toString();
+};
+/**
+ * 指定されたIPv4アドレスの次のアドレスを取得します
+ * @param {string} ipAddress IPv4アドレスを表す文字列
+ * @returns {string} 1つ繰り上げたIPv4アドレスを表す文字列
+ */
+ipaddr.IPv4.getNextIpAddress = (ipAddress, step = 1) => {
+    const octets = ipaddr.parse(ipAddress).octets
+    let num = 0;
+    for (let i = 0; i < octets.length; i++) {
+        num += parseInt(octets[i]) * Math.pow(256, 3 - i);
+    }//10進数変換
+    num += step;
+    const result = [];
+    for (let i = 0; i < 4; i++) {//文字列化
+        result.push(Math.floor(num / Math.pow(256, 3 - i)));
+        num = num % Math.pow(256, 3 - i);
+    }
+    return result.join(".");
+};
+// -----------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
 // 分割前のネットワークアドレスを生成
 // const networkPrefix = Math.randBetween(22, 25); // TODO 本番用
-const networkPrefix = 24; // TODO : 本番は削除
+const networkPrefix = 23; // TODO : 本番は削除
 console.info("network(origin) prefix", "Ready");
 
 // プライベートIPアドレスを決定
@@ -83,19 +174,8 @@ const subnetworkRequirementList = Array.from(new Array(subNetworkCount), (_, i) 
 });
 console.info("subnetwork hostrequirement", "Ready");
 
-const sortedSubnetworkRequirementList = subnetworkRequirementList.slice().sort((a, b) => {
-    return b.hostCount - a.hostCount;
-})
+// 問題の情報
+console.table(subnetworkRequirementList.slice())
 
-// デバック情報
-console.table(
-    {
-        "networkAddress": ipaddr.IPv4
-            .networkAddressFromCIDR(`${networkAddress}/${networkPrefix}`).toString(),
-        "Prefix(CIDR)": networkPrefix,
-        "subNetworkCount": subNetworkCount,
-        // "要件":
-    }
-);
-console.table(subnetworkRequirementList)
-console.table(sortedSubnetworkRequirementList)
+// 回答を作成
+generationAnswer(subnetworkRequirementList);
