@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VLSM learning</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma-rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cferdinandi/tabby@12/dist/css/tabby-ui.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/bulma-prefers-dark">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-checkradio@2.1.3/dist/css/bulma-checkradio.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/tabby@12/dist/js/tabby.polyfills.min.js" defer></script>
+    <script src="script.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/ipaddr.js@2/lib/ipaddr.min.js"></script>
+    <script src="https://unpkg.com/form-storage@1.2.0/build/form-storage.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"
+        integrity="sha256-iOtvu+DCcN3zOEruDJYg0HDgkKJuB8Z0Ia42yQO11kk=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js" type="module"></script>
+    <script src="main.js" defer type="module"></script>
+</head>
+
+<body>
+    <div id="pdf"></div>
+    <style>
+        #tabs-with-content .tabs:not(:last-child) {
+            margin-bottom: 0;
+        }
+
+        #tabs-with-content .tab-content {
+            padding: 1rem;
+            display: none;
+        }
+
+        #tabs-with-content .tab-content.is-active {
+            display: block;
+        }
+    </style>
+    <section class="section">
+        <div class="tabs is-large is-fullwidth">
+            <ul data-tabs>
+                <li class="is-active"><a href="#Quiz">問題</a></li>
+                <li><a href="#Answer">答え</a></li>
+                <li><a data-tabby-default href="#Grade">採点</a></li>
+                <li><a href="#Download">問題ダウンロード</a></li>
+                <li><a href="#Description">説明</a></li>
+            </ul>
+        </div>
+        <div class="container">
+            <h1 class="title">
+                VLSM Skill Base Assesment 対策
+            </h1>
+            <p class="subtitle">
+                自動的に生成した問題を解いて対策をしよう!
+            </p>
+        </div>
+        <hr>
+        <div>
+            <section class="tab-content" id="Quiz">
+                <h2 class="title">条件</h2>
+                <div id="Requirement"></div>
+                <p>各サブネットとホストの台数が与えられます。</p>
+            </section>
+            <section class="tab-content" id="Answer">
+                <h2 class="title">答え</h2>
+                <div id="AnswerTable" class="table-container"></div>
+                <p>各サブネットの情報が<strong>割り当て順に</strong>出力されます。</p>
+            </section>
+            <section class="tab-content" id="Grade">
+                <form class="js-form-storage">
+                    <div class="field">
+                        <label class="label"><span name="SubnetName"></span> ネットワークアドレス/CIDR</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="192.168.10.0/24" answer="">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label"><span name="SubnetName"></span> ダイレクトブロードキャストアドレス/CIDR</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="192.168.10.255/24" answer="">
+                        </div>
+                    </div>
+                </form>
+            </section>
+            <section class="tab-content" id="Download">
+                <article class="message is-info">
+                    <div class="message-header">
+                        <p>Info</p>
+                    </div>
+                    <div class="message-body">
+                        申し訳ございませんが、ただいま準備中です。
+                    </div>
+                </article>
+            </section>
+            <section class="tab-content" id="Description">
+                <h2 class="title is-spaced">どういう仕組み?</h2>
+                <p>このツールはIPアドレス操作ライブラリによってサブネットの計算問題を生成します。</p>
+                <p>同時に計算結果の答えを生成します。</p>
+                <h2>新しい問題をとくには?</h2>
+                <p>再読み込みしてください。</p>
+            </section>
+        </div>
+    </section>
+</body>
+
+</html>
