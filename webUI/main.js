@@ -169,7 +169,6 @@ class SubnetworkConfig {
         let head = "# VLSM Skill Base Assesment 対策\n\n"
         head += "自動的に生成した問題を解いて対策しよう!\n"
         head += "\n---\n"
-        console.log(head);
         let quiz = "## 問題\n\n";
         quiz += "|  サブネットワーク名  |  ホストの数  |\n";
         quiz += "| ---- | ---- |\n";
@@ -214,7 +213,6 @@ class SubnetworkConfig {
             answer += `| ルータインターフェース | ${item.lastHostAddress.split("/")[0]} | ${item.subnetMask} | 該当なし |\n`
             answer += item.AreSwitcheInSubnetwork ? `| スイッチ仮想インターフェース | ${item.switchIPAddress.split("/")[0]} | ${item.subnetMask} | 該当なし |\n` : ""
             answer += "\n"
-            console.log(item);
         }
         return [head, quiz, answer].join("\n");
     }
@@ -223,9 +221,6 @@ let quiz = new SubnetworkConfig();
 // 問題の情報
 // console.table(quiz.subnetworkRequirementList);
 // 回答を作成
-console.table(quiz.generationAnswer(quiz.subnetworkRequirementList));
-console.log(quiz.subnetworkRequirementList)
-console.log(quiz.subnetworkRequirementList.map(i => [i.subnetName, i.hostCount]))
 createTable(quiz.subnetworkRequirementList.map(i => [i.subnetName, i.hostCount]), "#Requirement", ["サブネットワーク名", "ホストの台数"]);
 createTable(quiz.generationAnswer(quiz.subnetworkRequirementList)
     .map(i => [i.subnetName, i.hostCount, i.availableSubnetworkMaxCount, i.binarySubnetMask, i.subnetMask, i.maxHostCount, i.addressAndCIDR, i.firstHostAddress, i.lastHostAddress, i.broadcastAddress]), "#AnswerTable",
@@ -234,7 +229,6 @@ createTable(quiz.generationAnswer(quiz.subnetworkRequirementList)
 // -----------------------------------------------------
 // md作成
 const markdown = quiz.createMarkdown();
-console.debug(markdown)
 // 変換器設定
 const converter = new showdown.Converter();
 converter.setOption('tables', true);
@@ -256,23 +250,86 @@ const downloadHtml = `<!DOCTYPE html>
 </body>
 
 </html>`
-console.log(downloadHtml);
-downloadText("quiz.html",downloadHtml);
+document.getElementById("DownloadButton").addEventListener("click", () => downloadText(`${new Date().toISOString()}_VLSM Skill Base Assesment.html`, downloadHtml), false);
 
+// ----------------------
+
+document.getElementById("showQuiz").addEventListener("click", () => {
+    const quizTab = document.getElementById("Quiz");
+    const showQuizButton = document.getElementById("showQuiz")
+    if (quizTab.getAttribute("hidden") === null) {
+        quizTab.setAttribute("hidden", "hidden");
+        showQuizButton.textContent = "問題を表示";
+    } else {
+        quizTab.removeAttribute("hidden");
+        showQuizButton.textContent = "問題を非表示";
+    }
+}, false)
 
 for (let item of quiz.subnetworkRequirementList) {
-    item.subnetName
-    item.hostCount
-    item.availableSubnetworkMaxCount
-    item.binarySubnetMask
-    item.subnetMask
-    item.maxHostCount
-    item.addressAndCIDR
-    item.firstHostAddress
-    item.lastHostAddress
-    item.broadcastAddress
+    const subnetName = item.subnetName;
+    const hostCount = item.hostCount;
+    const availableSubnetworkMaxCount = item.availableSubnetworkMaxCount;
+    const binarySubnetMask = item.binarySubnetMask;
+    const subnetMask = item.subnetMask;
+    const maxHostCount = item.maxHostCount;
+    const addressAndCIDR = item.addressAndCIDR;
+    const firstHostAddress = item.firstHostAddress;
+    const lastHostAddress = item.lastHostAddress;
+    const broadcastAddress = item.broadcastAddress;
     // "サブネットワーク名", "ホストの台数", "サブネットの最大数", "2進数サブネットマスク", "サブネットマスク", "最大ホスト数", "サブネットワークアドレス", "最初のホストIPアドレス", "最後のホストIPアドレス", "ダイレクトブロードキャストアドレス"
+    const quizFormFieldTemplate = document.getElementById("quizFormField");
+    const content = quizFormFieldTemplate.content;
+    const clone = document.importNode(content, true);
+    // 答え設定
+    clone.getElementById("subnetName").innerText = subnetName;
+    clone.getElementById("subnetName").removeAttribute("id");
+    let prefixLengthAnswer = clone.querySelector('[checkeType="prefixLength"]');
+    prefixLengthAnswer.setAttribute("answer", ipaddr.IPv4.parse(subnetMask).prefixLengthFromSubnetMask());
+    let binarySubnetmaskAnswer = clone.querySelector('[checkeType="binarySubnetmask"]');
+    binarySubnetmaskAnswer.setAttribute("answer", binarySubnetMask);
+    let subnetmaskAnswer = clone.querySelector('[checkeType="subnetmask"]');
+    subnetmaskAnswer.setAttribute("answer", subnetMask);
+    let availableSubnetworkMaxCountAnswer = clone.querySelector('[checkeType="availableSubnetworkMaxCount"]');
+    availableSubnetworkMaxCountAnswer.setAttribute("answer", availableSubnetworkMaxCount);
+    let addressAndCIDRAnswer = clone.querySelector('[checkeType="addressAndCIDR"]');
+    addressAndCIDRAnswer.setAttribute("answer", addressAndCIDR);
+    let firstHostAddressAnswer = clone.querySelector('[checkeType="firstHostAddress"]');
+    firstHostAddressAnswer.setAttribute("answer", firstHostAddress);
+    let lastHostAddressAnswer = clone.querySelector('[checkeType="lastHostAddress"]');
+    lastHostAddressAnswer.setAttribute("answer", lastHostAddress);
+    let broadcastAddressAnswer = clone.querySelector('[checkeType="broadcastAddress"]');
+    broadcastAddressAnswer.setAttribute("answer", broadcastAddress);
+    function simpleCheck(event) {
+        if (event.target.getAttribute("answer") === event.target.value) {
+            event.target.parentElement.querySelector("p.help.is-success").classList.remove("is-hidden");
+            event.target.parentElement.querySelector("p.help.is-warning").classList.add("is-hidden");
+        } else {
+            event.target.parentElement.querySelector("p.help.is-success").classList.add("is-hidden");
+            event.target.parentElement.querySelector("p.help.is-warning").classList.remove("is-hidden");
+        }
+    }
+    // イベント処理
+    prefixLengthAnswer.addEventListener("change", simpleCheck, false);
+    binarySubnetmaskAnswer.addEventListener("change", simpleCheck, false);
+    // subnetmaskAnswer.addEventListener("change", , false);
+    availableSubnetworkMaxCountAnswer.addEventListener("change", simpleCheck, false);
+    addressAndCIDRAnswer.addEventListener("change", (event) => {
+        // -->
+
+    }, false);
+    firstHostAddressAnswer.addEventListener("change", (event) => {
+        // -->
+
+    }, false);
+    lastHostAddressAnswer.addEventListener("change", (event) => {
+        // -->
+
+    }, false);
+    broadcastAddressAnswer.addEventListener("change", (event) => {
+        // -->
+
+    }, false);
+    // ---
+    quizFormFieldTemplate.before(clone);
 }
-
-
-console.log()
