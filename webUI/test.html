@@ -1,32 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 
 <head>
-    <meta charset="utf-8">
-    <title>Markdown to PDF</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 12pt;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://fonts.xz.style/serve/inter.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css">
 </head>
 
 <body>
-    <div id="pdf"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script>
-        const markdown = '# hello world!';
-        const converter = new showdown.Converter();
-        const html = converter.makeHtml(markdown);
-        const pdf = new jsPDF();
-        pdf.html(html, {
-            callback: function () {
-                pdf.save('hello-world.pdf');
-            }
-        });
-    </script>
+    ${content}
 </body>
 
 </html>

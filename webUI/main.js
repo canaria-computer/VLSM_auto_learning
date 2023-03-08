@@ -231,19 +231,33 @@ createTable(quiz.generationAnswer(quiz.subnetworkRequirementList)
     .map(i => [i.subnetName, i.hostCount, i.availableSubnetworkMaxCount, i.binarySubnetMask, i.subnetMask, i.maxHostCount, i.addressAndCIDR, i.firstHostAddress, i.lastHostAddress, i.broadcastAddress]), "#AnswerTable",
     ["サブネットワーク名", "ホストの台数", "サブネットの最大数", "2進数サブネットマスク", "サブネットマスク", "最大ホスト数", "サブネットワークアドレス", "最初のホストIPアドレス", "最後のホストIPアドレス", "ダイレクトブロードキャストアドレス"]);
 
-
-// ---------
+// -----------------------------------------------------
+// md作成
 const markdown = quiz.createMarkdown();
+console.debug(markdown)
+// 変換器設定
 const converter = new showdown.Converter();
+converter.setOption('tables', true);
+// html生成
 const html = converter.makeHtml(markdown);
+const downloadHtml = `<!DOCTYPE html>
+<html lang="ja">
 
-import { jsPDF } from "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js";
-const pdf = new jsPDF();
-pdf.html(html, {
-    callback: function () {
-        pdf.save('hello-world.pdf');
-    }
-});
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://fonts.xz.style/serve/inter.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css">
+</head>
+
+<body>
+    ${html}
+</body>
+
+</html>`
+console.log(downloadHtml);
+downloadText("quiz.html",downloadHtml);
 
 
 for (let item of quiz.subnetworkRequirementList) {

@@ -49,7 +49,7 @@ function createTable(tableData, selector, head = []) {
         cell.appendChild(document.createTextNode(cellData));
         document.createElement("tr").appendChild(cell);
         tableThead.appendChild(document.createElement("tr").appendChild(cell))
-    }    
+    }
     // data body
     for (const rowData of tableData) {
         let row = document.createElement('tr');
@@ -65,3 +65,12 @@ function createTable(tableData, selector, head = []) {
     document.querySelector(selector).appendChild(table);
 }
 
+function downloadText(fileName, text) {
+    const blob = new Blob([text], { type: 'text/html' });
+    const aTag = document.createElement('a');
+    aTag.href = URL.createObjectURL(blob);
+    aTag.target = '_blank';
+    aTag.download = fileName;
+    aTag.click();
+    URL.revokeObjectURL(aTag.href);
+}
