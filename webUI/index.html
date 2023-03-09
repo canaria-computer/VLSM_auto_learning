@@ -66,6 +66,8 @@
             <div class="columns">
                 <section class="column tab-content content" id="Quiz">
                     <h2 class="title">条件</h2>
+                    <p>IPアドレスとサブネットマスクが<strong id="originIpAddressAndCIDR"
+                            class="has-text-primary"></strong>のネットワークを下の表に従いサブネット化してください。</p>
                     <div id="Requirement"></div>
                     <p>各サブネットとホストの台数が与えられます。</p>
                     <details class="message">
@@ -88,7 +90,10 @@
                             <p>ただし、IPv4射影IPv6アドレスはIPv6アドレスとして解釈し失敗します。</p>
                         </div>
                     </details>
-
+                    <h2>プレフィックス長の省略</h2>
+                    <p>このフォームの問題は最初にプレフィックス長を書いているのでプレフィックス長の省略を許可します。</p>
+                    <p>プレフィックス長がある場合、プレフィックス長を含め検査を行います。ただし、ネットワークビット数と矛盾するとき誤りと判断します。</p>
+                    <p>プレフィックス長を省略した場合も、問題なく解釈します。採点後に自動的に補完します。</p>
                 </section>
                 <section class="column tab-content content" id="Grade">
                     <div class="block buttons">
@@ -98,13 +103,14 @@
                     <template id="quizFormField">
                         <hr>
                         <h2 id="subnetName">${subnetName}</h2>
+                        <p class=" has-text-info">ホスト数:<strong id="hostCountField"></strong></p>
                         <div class="field">
                             <label class="label">サブネットワークのNWビット数(IPアドレスプレフィックス長)</label>
                             <div class="control">
                                 <input class="input" type="number" checkeType="prefixLength" placeholder="24" min="0"
                                     max="32" step="1" answer="">
                                 <p class="help is-success is-hidden">OK</p>
-                                <p class="help is-warning is-hidden">答えが正しくありません。</p>
+                                <p class="help is-warning is-hidden">答えが正しくありません</p>
                             </div>
 
                         </div>
@@ -112,80 +118,84 @@
                         <div class="field">
                             <label class="label">2進数サブネットマスク</label>
                             <div class="control">
-                                <input class="input" type="text" checkeType="binarySubnetmask"
+                                <input class="input" inputmode="decimal" type="text" checkeType="binarySubnetmask"
                                     placeholder="11111111.11111111.11111111.00000000" answer="">
                                 <p class="help is-success is-hidden">OK</p>
-                                <p class="help is-warning is-hidden">答えが正しくありません。</p>
+                                <p class="help is-warning is-hidden">答えが正しくありません</p>
                             </div>
                         </div>
 
                         <div class="field">
                             <label class="label">サブネットマスク(ドットデジマル表記法,10進数)</label>
                             <div class="control">
-                                <input class="input" type="text" checkeType="subnetmask" placeholder="255.255.255.0"
-                                    answer="">
+                                <input class="input" inputmode="decimal" type="text" checkeType="subnetmask"
+                                    placeholder="255.255.255.0" answer="">
                                 <p class="help is-success is-hidden">OK</p>
-                                <p class="help is-warning is-hidden">答えが正しくありません。</p>
+                                <p class="help is-warning is-hidden">答えが正しくありません</p>
                             </div>
                         </div>
 
                         <div class="field">
                             <label class="label">使用可能なサブネットワーク最大数</label>
                             <div class="control">
-                                <input class="input" type="text" max="2147483648" min="1" step="1"
+                                <input class="input" enterkeyhint="next" type="number" max="2147483648" min="1" step="1"
                                     checkeType="availableSubnetworkMaxCount" placeholder="256" answer="">
                                 <p class="help is-success is-hidden">OK</p>
-                                <p class="help is-warning is-hidden">答えが正しくありません。</p>
+                                <p class="help is-warning is-hidden">答えが正しくありません</p>
                             </div>
                         </div>
 
                         <div class="field">
                             <label class="label">最大ホスト数</label>
                             <div class="control">
-                                <input class="input" type="number" min="1" max="4294967296" checkType="maxHostCount"
-                                    placeholder="255" answer="">
+                                <input class="input" enterkeyhint="next" type="number" min="1" max="4294967296"
+                                    checkType="maxHostCount" placeholder="255" answer="">
                                 <p class="help is-success is-hidden">OK</p>
-                                <p class="help is-warning is-hidden">答えが正しくありません。</p>
+                                <p class="help is-warning is-hidden">答えが正しくありません</p>
                             </div>
                         </div>
 
                         <div class="field">
                             <label class="label">ネットワークアドレス</label>
+                            <p class="help">プレフィックス長を省略できます。</p>
                             <div class="control">
-                                <input class="input" type="text" checkeType="addressAndCIDR"
-                                    placeholder="192.168.10.0/24" answer="">
+                                <input class="input" inputmode="decimal" type="text" checkeType="addressAndCIDR"
+                                    placeholder="192.168.10.0" answer="">
                                 <p class="help is-success is-hidden">OK</p>
-                                <p class="help is-warning is-hidden">答えが正しくありません。</p>
+                                <p class="help is-warning is-hidden">答えが正しくありません</p>
                             </div>
                         </div>
 
                         <div class="field">
                             <label class="label">最初のホストアドレス</label>
+                            <p class="help">プレフィックス長を省略できます。</p>
                             <div class="control">
-                                <input class="input" type="text" checkeType="firstHostAddress"
-                                    placeholder="192.168.10.2/24" answer="">
+                                <input class="input" inputmode="decimal" type="text" checkeType="firstHostAddress"
+                                    placeholder="192.168.10.1" answer="">
                                 <p class="help is-success is-hidden">OK</p>
-                                <p class="help is-warning is-hidden">答えが正しくありません。</p>
+                                <p class="help is-warning is-hidden">答えが正しくありません</p>
                             </div>
                         </div>
 
                         <div class="field">
                             <label class="label">最後のホストアドレス</label>
+                            <p class="help">プレフィックス長を省略できます。</p>
                             <div class="control">
-                                <input class="input" type="text" checkeType="lastHostAddress"
-                                    placeholder="192.168.10.254/24" answer="">
+                                <input class="input" inputmode="decimal" type="text" checkeType="lastHostAddress"
+                                    placeholder="192.168.10.254" answer="">
                                 <p class="help is-success is-hidden">OK</p>
-                                <p class="help is-warning is-hidden">答えが正しくありません。</p>
+                                <p class="help is-warning is-hidden">答えが正しくありません</p>
                             </div>
                         </div>
 
                         <div class="field">
-                            <label class="label">ダイレクトブロードキャストアドレス/CIDR</label>
+                            <label class="label">ダイレクトブロードキャストアドレス</label>
+                            <p class="help">プレフィックス長を省略できます。</p>
                             <div class="control">
-                                <input class="input" type="text" checkeType="broadcastAddress"
-                                    placeholder="192.168.10.255/24" answer="">
+                                <input class="input" inputmode="decimal" type="text" checkeType="broadcastAddress"
+                                    placeholder="192.168.10.255" answer="">
                                 <p class="help is-success is-hidden">OK</p>
-                                <p class="help is-warning is-hidden">答えが正しくありません。</p>
+                                <p class="help is-warning is-hidden">答えが正しくありません</p>
                             </div>
                         </div>
                     </template>
@@ -229,9 +239,11 @@
                         <button class="delete" aria-label="delete"
                             onclick="event.target.parentElement.parentElement.remove();"></button>
                     </div>
-                    <!-- <div class="message-body">このツールの問題の自動採点はほぼ、本番試験に準拠していますが、プレフィックス長を省略しています。
-                        模範解答及びダウンロードしたデータは本番試験と同じ答えになりますが、自動採点はプレフィックス長を含めると採点できないため不正解になります。ご注意ください。
-                    </div> -->
+                    <div class="message-body">
+                        <p>このツールの問題の自動採点はほぼ、本番試験に準拠していますが、プレフィックス長を省略できます。本番試験では、省略ができないことがあります。</p>
+                        <p>模範解答及びダウンロードしたデータは本番試験と同じ答えになります。</p>
+                        <p>サブネットワークのNWビット数(IPアドレスプレフィックス長)が正しい場合に限り、CIDRは補完されます。</p>
+                    </div>
                 </article>
             </section>
         </div>

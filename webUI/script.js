@@ -74,3 +74,7 @@ function downloadText(fileName, text) {
     aTag.click();
     URL.revokeObjectURL(aTag.href);
 }
+
+function zeroPadding(num, len) {
+    return ( Array(len).join('0') + num ).slice( -len );
+}

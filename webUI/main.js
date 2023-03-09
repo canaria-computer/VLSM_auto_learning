@@ -153,7 +153,7 @@ class SubnetworkConfig {
             sortedSubnetworkRequirementList[i].plefixLength = ipaddr.IPv4.calculatePrefixLength(subnetInfo.hostCount);
             sortedSubnetworkRequirementList[i].addressAndCIDR = `${nextSubNetAddress}/${sortedSubnetworkRequirementList[i].plefixLength}`;// * NW アドレス
             sortedSubnetworkRequirementList[i].subnetMask = ipaddr.IPv4.subnetMaskFromPrefixLength(sortedSubnetworkRequirementList[i].plefixLength).toString();// * サブネットマスク
-            sortedSubnetworkRequirementList[i].binarySubnetMask = ipaddr.IPv4.subnetMaskFromPrefixLength(sortedSubnetworkRequirementList[i].plefixLength).toByteArray().map(b => b.toString(2)).join(".");//2進数 サブネットマスク
+            sortedSubnetworkRequirementList[i].binarySubnetMask = ipaddr.IPv4.subnetMaskFromPrefixLength(sortedSubnetworkRequirementList[i].plefixLength).toByteArray().map(b => b.toString(2)).map(d => zeroPadding(d, 8)).join(".");//2進数 サブネットマスク
             sortedSubnetworkRequirementList[i].firstHostAddress = ipaddr.IPv4.getFirstHostAddress(sortedSubnetworkRequirementList[i].addressAndCIDR) + `/${sortedSubnetworkRequirementList[i].plefixLength}`// 最初のホストアドレス
             sortedSubnetworkRequirementList[i].lastHostAddress = ipaddr.IPv4.getLastHostAddress(sortedSubnetworkRequirementList[i].addressAndCIDR) + `/${sortedSubnetworkRequirementList[i].plefixLength}`//最後のホストアドレス
             sortedSubnetworkRequirementList[i].broadcastAddress = ipaddr.IPv4.broadcastAddressFromCIDR(sortedSubnetworkRequirementList[i].addressAndCIDR) + `/${sortedSubnetworkRequirementList[i].plefixLength}`// ブロードキャストアドレス
@@ -170,6 +170,7 @@ class SubnetworkConfig {
         head += "自動的に生成した問題を解いて対策しよう!\n"
         head += "\n---\n"
         let quiz = "## 問題\n\n";
+        quiz += `IPアドレスとサブネットマスクが**${this.networkAddress.toString()}/${this.networkPrefix}**のネットワークを下の表に従いサブネット化してください。\n`
         quiz += "|  サブネットワーク名  |  ホストの数  |\n";
         quiz += "| ---- | ---- |\n";
 
@@ -225,7 +226,7 @@ createTable(quiz.subnetworkRequirementList.map(i => [i.subnetName, i.hostCount])
 createTable(quiz.generationAnswer(quiz.subnetworkRequirementList)
     .map(i => [i.subnetName, i.hostCount, i.availableSubnetworkMaxCount, i.binarySubnetMask, i.subnetMask, i.maxHostCount, i.addressAndCIDR, i.firstHostAddress, i.lastHostAddress, i.broadcastAddress]), "#AnswerTable",
     ["サブネットワーク名", "ホストの台数", "サブネットの最大数", "2進数サブネットマスク", "サブネットマスク", "最大ホスト数", "サブネットワークアドレス", "最初のホストIPアドレス", "最後のホストIPアドレス", "ダイレクトブロードキャストアドレス"]);
-
+document.getElementById("originIpAddressAndCIDR").textContent = `${quiz.networkAddress.toString()}/${quiz.networkPrefix}`
 // -----------------------------------------------------
 // md作成
 const markdown = quiz.createMarkdown();
@@ -265,6 +266,14 @@ document.getElementById("showQuiz").addEventListener("click", () => {
         showQuizButton.textContent = "問題を非表示";
     }
 }, false)
+for (let element of document.querySelectorAll("div.tabs > ul > *:not(li:nth-child(1))")) {
+    const quizTab = document.getElementById("Quiz");
+    const showQuizButton = document.getElementById("showQuiz")
+    element.addEventListener("click", () => {
+        quizTab.setAttribute("hidden", "hidden");
+        showQuizButton.textContent = "問題を表示";
+    }, true);
+}
 
 for (let item of quiz.subnetworkRequirementList) {
     const subnetName = item.subnetName;
@@ -284,12 +293,16 @@ for (let item of quiz.subnetworkRequirementList) {
     // 答え設定
     clone.getElementById("subnetName").innerText = subnetName;
     clone.getElementById("subnetName").removeAttribute("id");
+    clone.getElementById("hostCountField").innerText = hostCount;
+    clone.getElementById("hostCountField").removeAttribute("id");
     let prefixLengthAnswer = clone.querySelector('[checkeType="prefixLength"]');
     prefixLengthAnswer.setAttribute("answer", ipaddr.IPv4.parse(subnetMask).prefixLengthFromSubnetMask());
     let binarySubnetmaskAnswer = clone.querySelector('[checkeType="binarySubnetmask"]');
     binarySubnetmaskAnswer.setAttribute("answer", binarySubnetMask);
     let subnetmaskAnswer = clone.querySelector('[checkeType="subnetmask"]');
     subnetmaskAnswer.setAttribute("answer", subnetMask);
+    let maxHostCountAnswer = clone.querySelector('[checkType="maxHostCount"]');
+    maxHostCountAnswer.setAttribute("answer", maxHostCount);
     let availableSubnetworkMaxCountAnswer = clone.querySelector('[checkeType="availableSubnetworkMaxCount"]');
     availableSubnetworkMaxCountAnswer.setAttribute("answer", availableSubnetworkMaxCount);
     let addressAndCIDRAnswer = clone.querySelector('[checkeType="addressAndCIDR"]');
@@ -302,33 +315,155 @@ for (let item of quiz.subnetworkRequirementList) {
     broadcastAddressAnswer.setAttribute("answer", broadcastAddress);
     function simpleCheck(event) {
         if (event.target.getAttribute("answer") === event.target.value) {
-            event.target.parentElement.querySelector("p.help.is-success").classList.remove("is-hidden");
-            event.target.parentElement.querySelector("p.help.is-warning").classList.add("is-hidden");
+            changeResult("correct", event.target)
         } else {
-            event.target.parentElement.querySelector("p.help.is-success").classList.add("is-hidden");
-            event.target.parentElement.querySelector("p.help.is-warning").classList.remove("is-hidden");
+            changeResult("incorrect", event.target)
+        }
+    }
+    function changeResult(result, baseElement) {
+        switch (result) {
+            case "correct":
+                baseElement.parentElement.querySelector("p.help.is-success").classList.remove("is-hidden");
+                baseElement.parentElement.querySelector("p.help.is-warning").classList.add("is-hidden");
+                baseElement.classList.remove("is-warning", "is-warning", "has-background-warning");
+                baseElement.classList.add("is-success", "has-background-success", "has-text-white");
+                break;
+            case "incorrect":
+                baseElement.parentElement.querySelector("p.help.is-success").classList.add("is-hidden");
+                baseElement.parentElement.querySelector("p.help.is-warning").classList.remove("is-hidden");
+                baseElement.classList.add("is-warning", "has-background-warning");
+                baseElement.classList.remove("is-success", "has-background-success", "has-text-white");
+                break;
+            default: break;
         }
     }
     // イベント処理
     prefixLengthAnswer.addEventListener("change", simpleCheck, false);
-    binarySubnetmaskAnswer.addEventListener("change", simpleCheck, false);
-    // subnetmaskAnswer.addEventListener("change", , false);
+    binarySubnetmaskAnswer.addEventListener("change", (event) => {
+        let answer = event.target.value
+        let binaryOctet = answer.split(/\.| /g);
+        if (1 <= binaryOctet.length < 4) {
+            answer = binaryOctet.join("");
+        }
+        event.target.value = (binaryOctet = answer.match(/\d{8}/g)).join(".");
+        simpleCheck(event);
+    }, false);
+    subnetmaskAnswer.addEventListener("change", (event) => {
+        // レアアドレスフォーマットをスタンダードフォーマットに変換する
+        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0])) ){// IPアドレスが有効か判定する
+            changeResult("incorrect", event.target)
+            return;
+        }
+        if (event.target.value !== ipaddr.IPv4.parse(event.target.value)) {
+            event.target.value = ipaddr.IPv4.parse(event.target.value)
+        }
+        simpleCheck(event);
+    }, false);
+    maxHostCountAnswer.addEventListener("change", simpleCheck, false);
     availableSubnetworkMaxCountAnswer.addEventListener("change", simpleCheck, false);
     addressAndCIDRAnswer.addEventListener("change", (event) => {
-        // -->
-
+        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0])) ){// IPアドレスが有効か判定する
+            changeResult("incorrect", event.target)
+            return;
+        }
+        const answerAddressAndSIDR = event.target.getAttribute("answer");
+        const [answerAddress, _] = ipaddr.IPv4.parseCIDR(answerAddressAndSIDR);
+        if (event.target.value.indexOf("/") === -1) {//プレフィックス長を含まないとき
+            event.target.value = ipaddr.IPv4.parse(event.target.value).toString();
+            if (event.target.value === answerAddress.toString()) {
+                changeResult("correct", event.target);
+                if (prefixLengthAnswer.parentElement.querySelector("p.help.is-success").classList.contains("is-hidden") === false) {
+                    event.target.value = event.target.getAttribute("answer");
+                }
+            } else {
+                changeResult("incorrect", event.target);
+            }
+        } else {
+            event.target.value = ipaddr.IPv4.parseCIDR(event.target.value).toString();
+            if (answerAddressAndSIDR === ipaddr.IPv4.parseCIDR(event.target.value).toString()) {
+                changeResult("correct", event.target);
+            } else {
+                changeResult("incorrect", event.target);
+            }
+        }
     }, false);
     firstHostAddressAnswer.addEventListener("change", (event) => {
-        // -->
-
+        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0])) ){// IPアドレスが有効か判定する
+            changeResult("incorrect", event.target)
+            return;
+        }
+        const answerAddressAndSIDR = event.target.getAttribute("answer");
+        const [answerAddress, _] = ipaddr.IPv4.parseCIDR(answerAddressAndSIDR);
+        if (event.target.value.indexOf("/") === -1) {//プレフィックス長を含まないとき
+            event.target.value = ipaddr.IPv4.parse(event.target.value).toString();
+            if (event.target.value === answerAddress.toString()) {
+                changeResult("correct", event.target);
+                if (prefixLengthAnswer.parentElement.querySelector("p.help.is-success").classList.contains("is-hidden") === false) {
+                    event.target.value = event.target.getAttribute("answer");
+                }
+            } else {
+                changeResult("incorrect", event.target);
+            }
+        } else {
+            event.target.value = ipaddr.IPv4.parseCIDR(event.target.value).toString();
+            if (answerAddressAndSIDR === ipaddr.IPv4.parseCIDR(event.target.value).toString()) {
+                changeResult("correct", event.target);
+            } else {
+                changeResult("incorrect", event.target);
+            }
+        }
     }, false);
     lastHostAddressAnswer.addEventListener("change", (event) => {
-        // -->
-
+        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0])) ){// IPアドレスが有効か判定する
+            changeResult("incorrect", event.target)
+            return;
+        }
+        const answerAddressAndSIDR = event.target.getAttribute("answer");
+        const [answerAddress, _] = ipaddr.IPv4.parseCIDR(answerAddressAndSIDR);
+        if (event.target.value.indexOf("/") === -1) {//プレフィックス長を含まないとき
+            event.target.value = ipaddr.IPv4.parse(event.target.value).toString();
+            if (event.target.value === answerAddress.toString()) {
+                changeResult("correct", event.target);
+                if (prefixLengthAnswer.parentElement.querySelector("p.help.is-success").classList.contains("is-hidden") === false) {
+                    event.target.value = event.target.getAttribute("answer");
+                }
+            } else {
+                changeResult("incorrect", event.target);
+            }
+        } else {
+            event.target.value = ipaddr.IPv4.parseCIDR(event.target.value).toString();
+            if (answerAddressAndSIDR === ipaddr.IPv4.parseCIDR(event.target.value).toString()) {
+                changeResult("correct", event.target);
+            } else {
+                changeResult("incorrect", event.target);
+            }
+        }
     }, false);
     broadcastAddressAnswer.addEventListener("change", (event) => {
-        // -->
-
+        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0])) ){// IPアドレスが有効か判定する
+            changeResult("incorrect", event.target)
+            return;
+        }
+        const answerAddressAndSIDR = event.target.getAttribute("answer");
+        const [answerAddress, _] = ipaddr.IPv4.parseCIDR(answerAddressAndSIDR);
+        if (event.target.value.indexOf("/") === -1) {//プレフィックス長を含まないとき
+            event.target.value = ipaddr.IPv4.parse(event.target.value).toString();
+            if (event.target.value === answerAddress.toString()) {
+                changeResult("correct", event.target);
+                if (prefixLengthAnswer.parentElement.querySelector("p.help.is-success").classList.contains("is-hidden") === false) {
+                    event.target.value = event.target.getAttribute("answer");
+                }
+            } else {
+                changeResult("incorrect", event.target);
+            }
+        } else {
+            event.target.value = ipaddr.IPv4.parseCIDR(event.target.value).toString();
+            if (answerAddressAndSIDR === ipaddr.IPv4.parseCIDR(event.target.value).toString()) {
+                changeResult("correct", event.target);
+            } else {
+                changeResult("incorrect", event.target);
+            }
+        }
     }, false);
     // ---
     quizFormFieldTemplate.before(clone);
