@@ -97,8 +97,9 @@
                 </section>
                 <section class="column tab-content content" id="Grade">
                     <div class="block buttons">
-                        <button class="button is-fullwidth" id="showQuiz">問題を並べて表示する</button>
-                        <!-- <button class="button is-primary is-fullwidth" id="checkAnswer">答え合わせ</button> -->
+                        <button class="button is-info is-fullwidth" id="showQuiz">問題を並べて表示する</button>
+                        <a class="button is-fullwidth is-hidden" id="checkAnswer"
+                            href="#CorrectAnswerRateDisplay">答え合わせ</a>
                     </div>
                     <template id="quizFormField">
                         <hr>
@@ -112,7 +113,6 @@
                                 <p class="help is-success is-hidden">OK</p>
                                 <p class="help is-warning is-hidden">答えが正しくありません</p>
                             </div>
-
                         </div>
 
                         <div class="field">
@@ -200,16 +200,16 @@
                         </div>
                     </template>
                     <hr>
-                    <template>
-                        <article class="message">
-                            <div class="message-header">
-                                <p>採点結果</p>
-                                <button class="delete" aria-label="delete"
-                                    onclick="event.target.parentElement.parentElement.remove();"></button>
-                            </div>
-                            <div class="message-body">未回答</div>
-                        </article>
-                    </template>
+                    <article class="message">
+                        <div class="message-header">
+                            <p>採点結果</p>
+                        </div>
+                        <div class="message-body">
+                            <progress class="progress block is-small" id="CorrectAnswerRateDisplayProgressBar"
+                                max="100">20%</progress>
+                            <p id="CorrectAnswerRateDisplay">未回答</p>
+                        </div>
+                    </article>
                 </section>
             </div>
 

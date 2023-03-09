@@ -76,5 +76,15 @@ function downloadText(fileName, text) {
 }
 
 function zeroPadding(num, len) {
-    return ( Array(len).join('0') + num ).slice( -len );
+    return (Array(len).join('0') + num).slice(-len);
+}
+
+function updateCorrectAnswerRate() {
+    document.querySelector("#checkAnswer").classList.remove("is-hidden");// 答えのリンクを表示する
+    const correctAnswerRateDisplay = document.getElementById("CorrectAnswerRateDisplay");
+    const ratePercent = (~~(document.querySelectorAll("p.help.is-success:not(.is-hidden)").length / document.querySelectorAll("p.help.is-success").length * 10000)) / 100;
+    correctAnswerRateDisplay.textContent = `正答率${ratePercent}%`
+    const correctAnswerRateDisplayProgressBar = document.getElementById("CorrectAnswerRateDisplayProgressBar");
+    correctAnswerRateDisplayProgressBar.value = ratePercent;
+    return undefined;
 }

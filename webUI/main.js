@@ -350,7 +350,7 @@ for (let item of quiz.subnetworkRequirementList) {
     }, false);
     subnetmaskAnswer.addEventListener("change", (event) => {
         // レアアドレスフォーマットをスタンダードフォーマットに変換する
-        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0])) ){// IPアドレスが有効か判定する
+        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0]))) {// IPアドレスが有効か判定する
             changeResult("incorrect", event.target)
             return;
         }
@@ -362,7 +362,7 @@ for (let item of quiz.subnetworkRequirementList) {
     maxHostCountAnswer.addEventListener("change", simpleCheck, false);
     availableSubnetworkMaxCountAnswer.addEventListener("change", simpleCheck, false);
     addressAndCIDRAnswer.addEventListener("change", (event) => {
-        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0])) ){// IPアドレスが有効か判定する
+        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0]))) {// IPアドレスが有効か判定する
             changeResult("incorrect", event.target)
             return;
         }
@@ -388,7 +388,7 @@ for (let item of quiz.subnetworkRequirementList) {
         }
     }, false);
     firstHostAddressAnswer.addEventListener("change", (event) => {
-        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0])) ){// IPアドレスが有効か判定する
+        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0]))) {// IPアドレスが有効か判定する
             changeResult("incorrect", event.target)
             return;
         }
@@ -414,7 +414,7 @@ for (let item of quiz.subnetworkRequirementList) {
         }
     }, false);
     lastHostAddressAnswer.addEventListener("change", (event) => {
-        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0])) ){// IPアドレスが有効か判定する
+        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0]))) {// IPアドレスが有効か判定する
             changeResult("incorrect", event.target)
             return;
         }
@@ -440,7 +440,7 @@ for (let item of quiz.subnetworkRequirementList) {
         }
     }, false);
     broadcastAddressAnswer.addEventListener("change", (event) => {
-        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0])) ){// IPアドレスが有効か判定する
+        if (!(ipaddr.isValid(event.target.value) || ipaddr.isValid(event.target.value.split("/")[0]))) {// IPアドレスが有効か判定する
             changeResult("incorrect", event.target)
             return;
         }
@@ -466,5 +466,13 @@ for (let item of quiz.subnetworkRequirementList) {
         }
     }, false);
     // ---
+    for (let elementListItem of [
+        prefixLengthAnswer, binarySubnetmaskAnswer, subnetmaskAnswer,
+        maxHostCountAnswer, availableSubnetworkMaxCountAnswer, addressAndCIDRAnswer,
+        firstHostAddressAnswer, lastHostAddressAnswer, broadcastAddressAnswer
+    ]) {
+        elementListItem.addEventListener("change", updateCorrectAnswerRate, false);
+    }
     quizFormFieldTemplate.before(clone);
 }
+
