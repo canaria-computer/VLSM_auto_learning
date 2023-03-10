@@ -110,7 +110,8 @@ class SubnetworkConfig {
     }
 
     determinePrivateIPv4Address() {
-        const PIPAC = "ABC".split("");// PIPAC = Private IP Address Class
+        const PIPAC = ["A", "B", "C"];
+        // PIPAC = Private IP Address Class
         let addressClass = Math.randBetween(0, PIPAC.length - 1);
         let ipv4Address = "";
         switch (PIPAC[addressClass]) {
@@ -132,7 +133,7 @@ class SubnetworkConfig {
      * @returns {number}
      */
     subNetworkCountDetermining(prefix) {
-        let hostBitLength = 32 - prefix;// prefix=24 => 8bit
+        let hostBitLength = 32 - prefix;
         return Math.randBetween(2, hostBitLength);
     };
 
