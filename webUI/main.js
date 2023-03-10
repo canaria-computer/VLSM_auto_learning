@@ -227,7 +227,9 @@ createTable(quiz.subnetworkRequirementList.map(i => [i.subnetName, i.hostCount])
 createTable(quiz.generationAnswer(quiz.subnetworkRequirementList)
     .map(i => [i.subnetName, i.hostCount, i.availableSubnetworkMaxCount, i.binarySubnetMask, i.subnetMask, i.maxHostCount, i.addressAndCIDR, i.firstHostAddress, i.lastHostAddress, i.broadcastAddress]), "#AnswerTable",
     ["サブネットワーク名", "ホストの台数", "サブネットの最大数", "2進数サブネットマスク", "サブネットマスク", "最大ホスト数", "サブネットワークアドレス", "最初のホストIPアドレス", "最後のホストIPアドレス", "ダイレクトブロードキャストアドレス"]);
-document.getElementById("originIpAddressAndCIDR").textContent = `${quiz.networkAddress.toString()}/${quiz.networkPrefix}`
+const originIpAddressAndCIDR = document.getElementById("originIpAddressAndCIDR")
+originIpAddressAndCIDR.textContent = `${quiz.networkAddress.toString()}/${quiz.networkPrefix}`;
+originIpAddressAndCIDR.setAttribute("data-clipboard-text", quiz.networkAddress.toString());
 // -----------------------------------------------------
 // md作成
 const markdown = quiz.createMarkdown();
@@ -326,14 +328,14 @@ for (let item of quiz.subnetworkRequirementList) {
             case "correct":
                 baseElement.parentElement.querySelector("p.help.is-success").classList.remove("is-hidden");
                 baseElement.parentElement.querySelector("p.help.is-warning").classList.add("is-hidden");
-                baseElement.classList.remove("is-warning", "is-warning", "has-background-warning");
-                baseElement.classList.add("is-success", "has-background-success", "has-text-white");
+                baseElement.classList.remove("is-warning", "has-text-warning");
+                baseElement.classList.add("is-success", "has-background-success");
                 break;
             case "incorrect":
                 baseElement.parentElement.querySelector("p.help.is-success").classList.add("is-hidden");
                 baseElement.parentElement.querySelector("p.help.is-warning").classList.remove("is-hidden");
-                baseElement.classList.add("is-warning", "has-background-warning");
-                baseElement.classList.remove("is-success", "has-background-success", "has-text-white");
+                baseElement.classList.add("is-warning", "has-text-warning");
+                baseElement.classList.remove("is-success", "has-background-success");
                 break;
             default: break;
         }
@@ -343,8 +345,12 @@ for (let item of quiz.subnetworkRequirementList) {
     binarySubnetmaskAnswer.addEventListener("change", (event) => {
         let answer = event.target.value
         let binaryOctet = answer.split(/\.| /g);
-        if (1 <= binaryOctet.length < 4) {
+        if (1 <= binaryOctet.length && binaryOctet.length < 4) {
             answer = binaryOctet.join("");
+        }
+
+        if (0 < answer.length && answer.length < 32) {
+            answer += "0".repeat(32 - answer.length)
         }
         event.target.value = (binaryOctet = answer.match(/\d{8}/g)).join(".");
         simpleCheck(event);

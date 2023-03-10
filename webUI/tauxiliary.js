@@ -88,3 +88,12 @@ function updateCorrectAnswerRate() {
     correctAnswerRateDisplayProgressBar.value = ratePercent;
     return undefined;
 }
+
+function copyTooltipOnClipboard(targetElement) {
+    let text = targetElement.getAttribute("data-tooltip");
+    targetElement.setAttribute("data-tooltip", "コピーしました")
+    setTimeout(() => {
+        // 元に戻す
+        targetElement.setAttribute("data-tooltip", text)
+    }, 1000);
+}
