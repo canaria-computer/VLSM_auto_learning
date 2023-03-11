@@ -328,14 +328,14 @@ for (let item of quiz.subnetworkRequirementList) {
             case "correct":
                 baseElement.parentElement.querySelector("p.help.is-success").classList.remove("is-hidden");
                 baseElement.parentElement.querySelector("p.help.is-warning").classList.add("is-hidden");
-                baseElement.classList.remove("is-warning", "has-text-warning");
-                baseElement.classList.add("is-success", "has-background-success");
+                baseElement.classList.remove("is-warning");
+                baseElement.classList.add("is-success", "has-background-success", "has-text-white");
                 break;
             case "incorrect":
                 baseElement.parentElement.querySelector("p.help.is-success").classList.add("is-hidden");
                 baseElement.parentElement.querySelector("p.help.is-warning").classList.remove("is-hidden");
-                baseElement.classList.add("is-warning", "has-text-warning");
-                baseElement.classList.remove("is-success", "has-background-success");
+                baseElement.classList.add("is-warning");
+                baseElement.classList.remove("is-success", "has-background-success", "has-text-white");
                 break;
             default: break;
         }
@@ -343,16 +343,14 @@ for (let item of quiz.subnetworkRequirementList) {
     // イベント処理
     prefixLengthAnswer.addEventListener("change", simpleCheck, false);
     binarySubnetmaskAnswer.addEventListener("change", (event) => {
-        let answer = event.target.value
-        let binaryOctet = answer.split(/\.| /g);
-        if (1 <= binaryOctet.length && binaryOctet.length < 4) {
-            answer = binaryOctet.join("");
-        }
-
-        if (0 < answer.length && answer.length < 32) {
-            answer += "0".repeat(32 - answer.length)
-        }
-        event.target.value = (binaryOctet = answer.match(/\d{8}/g)).join(".");
+        var subnet = event.target.value;
+        // 入力を整形
+        subnet = subnet.replace(/[\s\.]/g, ""); // 空白とドットを削除
+        subnet = subnet.padEnd(32, "0"); // 32ビットになるように0で埋める
+        // 2進数をドット区切り形式に整形
+        subnet = subnet.match(/.{1,8}/g).join(".");
+        event.target.value = subnet;
+        console.debug(subnet);
         simpleCheck(event);
     }, false);
     subnetmaskAnswer.addEventListener("change", (event) => {
