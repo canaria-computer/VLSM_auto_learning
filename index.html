@@ -18,16 +18,11 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="webUI\tauxiliary.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/ipaddr.js@2/lib/ipaddr.min.js"></script>
-    <script src="https://unpkg.com/form-storage@1.2.0/build/form-storage.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"
         integrity="sha256-iOtvu+DCcN3zOEruDJYg0HDgkKJuB8Z0Ia42yQO11kk=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.1/purify.min.js"
         integrity="sha512-TU4FJi5o+epsahLtM9OFRvH2gXmmlzGlysk9wtTFgbYbMvFzh3Cw1l3ubnYIvBiZCC/aurRHS408TeEbcuOoyQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
-        integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js" type="module"></script>
     <script src="webUI\main.js" defer type="module"></script>
     <script src="webUI\clipboard-config.js" defer></script>
 </head>
@@ -73,6 +68,10 @@
                     <p>IPアドレスとサブネットマスクが
                         <strong id="originIpAddressAndCIDR" clipboard-copy="true" data-tooltip="クリップボードにコピー"
                             class="has-text-primary"></strong>
+                        <button class="is-unselectable material-symbols-outlined"
+                            data-clipboard-target="#originIpAddressAndCIDR" clipboard-copy="true">
+                            content_copy
+                        </button>
                         のネットワークを下の表に従いサブネット化してください。
                     </p>
                     <div id="Requirement"></div>
@@ -225,16 +224,21 @@
 
             <section class="tab-content content" id="Answer">
                 <h2 class="title">答え</h2>
+                <p>各サブネットの情報が<strong class="is-prymary">割り当て順に</strong>出力されます。</p>
                 <div id="AnswerTable" class="table-container"></div>
-                <p>各サブネットの情報が<strong>割り当て順に</strong>出力されます。</p>
             </section>
             <section class="tab-content content" id="Download">
                 <h2>問題と答え</h2>
-                <button id="DownloadButton" class="button is-medium is-fullwidth is-link"><span
-                        class="material-symbols-outlined">
-                        download
-                    </span>問題をダウンロードする</button>
-
+                <div class="buttons">
+                    <button id="DownloadButton" class="button is-medium is-fullwidth is-link "><span
+                            class="material-symbols-outlined">
+                            download
+                        </span>模範解答をダウンロードする</button>
+                    <button id="ClearAnswerSheetDownloadButton" class="button is-medium is-fullwidth is-link"><span
+                            class="material-symbols-outlined">
+                            download
+                        </span>回答用の用紙をダウンロードする</button>
+                </div>
             </section>
             <section class="tab-content content" id="Description">
                 <h2 class="title is-spaced">どういう仕組み?</h2>
@@ -255,7 +259,7 @@
                         <p>サブネットワークのNWビット数(IPアドレスプレフィックス長)が正しい場合に限り、CIDRは補完されます。</p>
                     </div>
                 </article>
-                <h3>IPv6,IPv4両方の注意</h3>
+                <!-- <h3>IPv6,IPv4両方の注意</h3>
                 <p>ルータは、常に最初のホストアドレスです。スイッチ仮想インターフェースは2番目に使えるホストアドレスです。</p>
                 <h3>IPv4サブネット化の注意事項</h3>
                 <p>以下の条件を満たす必要があります。</p>
@@ -275,7 +279,7 @@
                     bit)によるサブネット化を利用し、常にサブネットIDを優先してサブネット化する必要があります。</p>
                 <p>サブネットIDは、サブネットの名前を使います。(例:サブネットC,グローバルルーティングプレフィックが2001:db8:1234:/48の場合、グローバルユニキャストアドレスは2001:db8:1234:
                     <strong>c</strong> ::/64のアドレスを使います。)
-                </p>
+                </p> -->
             </section>
         </div>
     </section>

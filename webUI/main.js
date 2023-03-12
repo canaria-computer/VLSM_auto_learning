@@ -83,8 +83,9 @@ ipaddr.IPv4.getNextIpAddress = (ipAddress, step = 1) => {
 
 class SubnetworkConfig {
     constructor() {
+        this.maxNetworkPrefix = 22;
         // 分割前のネットワークアドレスを生成
-        this.networkPrefix = Math.randBetween(22, 25);
+        this.networkPrefix = Math.randBetween(this.maxNetworkPrefix, 25);
         // プライベートIPアドレスを決定
         this.networkAddress = ipaddr.IPv4.parse(this.determinePrivateIPv4Address());
         // サブネットワーク数決定
@@ -218,11 +219,66 @@ class SubnetworkConfig {
         }
         return [head, quiz, answer].join("\n");
     }
+    createAnswerSheetMarkdown() {
+        let head = "# VLSM Skill Base Assesment 対策 回答用紙\n\n"
+        head += "自動的に生成した問題を解いて対策しよう!\n"
+        head += "\n---\n"
+        let quiz = "## 問題\n\n";
+        quiz += `IPアドレスとサブネットマスクが**${this.networkAddress.toString()}/${this.networkPrefix}**のネットワークを下の表に従いサブネット化してください。\n`
+        quiz += "|  サブネットワーク名  |  ホストの数  |\n";
+        quiz += "| ---- | ---- |\n";
+
+        let answer = "## 模範回答\n\n"
+        const addressPlaceholder = "   "
+        for (const item of this.subnetworkRequirementList) {
+            quiz += `| ${item.subnetName} | ${item.hostCount} |\n`
+            /*
+            subnetName    "サブネットA"
+            plefixLength        24
+            binarySubnetMask        "11111111.11111111.11111111.0"
+            subnetMask    "255.255.255.0"
+            availableSubnetworkMaxCount  4
+            maxHostCount        254
+            addressAndCIDR          "192.168.245.0/24"
+            firstHostAddress        "192.168.245.1/24"
+            lastHostAddress         "192.168.245.254/24"
+            broadcastAddress        "192.168.245.255/24"
+            AreSwitcheInSubnetwork    false
+            switchIPAddress  null
+            hostCount      145
+            */
+            answer += `### ${item.subnetName}\n\n`
+            answer += `#### 計算\n\n`
+            answer += "| 仕様 | 回答欄 |\n"
+            answer += "| --- | --- |\n"
+            answer += `|プレフィックス長|  |\n`
+            answer += `|2進数サブネットマスク| ${"1".repeat(this.maxNetworkPrefix).match(/\d{1,8}/g).join("").padEnd(32, "\\_").match(/.{1,8}/g).join(".")} |\n`
+            answer += `|サブネットマスク| ${addressPlaceholder} |\n`
+            answer += `|使用可能最大サブネットワーク数| \\_\\_\\_\\_\\_\\_個 |\n`
+            answer += `|最大ホスト数| \\_\\_\\_\\_\\_\\_台 |\n`
+            answer += `|サブネットワークアドレス| ${addressPlaceholder} |\n`
+            answer += `|最初のホストIPアドレス| ${addressPlaceholder} |\n`
+            answer += `|最後のホストIPアドレス| ${addressPlaceholder} |\n`
+            answer += `|ブロードキャストアドレス| ${addressPlaceholder} |\n`
+            answer += "\n"
+            answer += "#### アドレッシングテーブル\n"
+            answer += "\n"
+            answer += "| デバイス | IPアドレス| サブネットマスク | デフォルトゲートウェイ |\n"
+            answer += "| ------- | --------- | -------------- | -------------------- |\n"
+            answer += `| ホストコンピュータ | ${addressPlaceholder} | ${addressPlaceholder} | ${addressPlaceholder} |\n`
+            answer += `| ルータインターフェース | ${addressPlaceholder} | ${addressPlaceholder} | 該当なし |\n`
+            answer += item.AreSwitcheInSubnetwork ? `| スイッチ仮想インターフェース | ${addressPlaceholder} | ${addressPlaceholder} | 該当なし |\n` : ""
+            answer += "\n"
+            answer += "<style>@media print{@page{size:A4 landscape !important}}</style>"
+        }
+        console.debug([head, quiz, answer].join("\n"));
+        return [head, quiz, answer].join("\n");
+    }
 }
 let quiz = new SubnetworkConfig();
 // 問題の情報
 // console.table(quiz.subnetworkRequirementList);
-// 回答を作成
+// 回答を作成 表示
 createTable(quiz.subnetworkRequirementList.map(i => [i.subnetName, i.hostCount]), "#Requirement", ["サブネットワーク名", "ホストの台数"]);
 createTable(quiz.generationAnswer(quiz.subnetworkRequirementList)
     .map(i => [i.subnetName, i.hostCount, i.availableSubnetworkMaxCount, i.binarySubnetMask, i.subnetMask, i.maxHostCount, i.addressAndCIDR, i.firstHostAddress, i.lastHostAddress, i.broadcastAddress]), "#AnswerTable",
@@ -237,8 +293,8 @@ const markdown = quiz.createMarkdown();
 const converter = new showdown.Converter();
 converter.setOption('tables', true);
 // html生成
-const html = converter.makeHtml(markdown);
-const downloadHtml = `<!DOCTYPE html>
+const downloadHtml = (html) => {
+    return `<!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -253,8 +309,20 @@ const downloadHtml = `<!DOCTYPE html>
     ${html}
 </body>
 
-</html>`
-document.getElementById("DownloadButton").addEventListener("click", () => downloadText(`${new Date().toISOString()}_VLSM Skill Base Assesment.html`, downloadHtml), false);
+</html>`}
+
+document.getElementById("DownloadButton").addEventListener("click", () => downloadText(`${new Date().toISOString()}_VLSM Skill Base Assesment.html`, downloadHtml(converter.makeHtml(markdown))), false);
+
+// ----------------------
+// 空欄付き問題用紙を作る
+document.getElementById("ClearAnswerSheetDownloadButton").addEventListener("click", () => downloadText(`${new Date().toISOString()}_VLSM Skill Base Assesment Answer Sheet.html`,
+    downloadHtml(
+        converter.makeHtml(
+            quiz.createAnswerSheetMarkdown()
+        )
+    )
+))
+
 
 // ----------------------
 
