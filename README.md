@@ -57,4 +57,35 @@ IPv4 及び IPv6 のアドレッシングを行います。
 
 ## 動作確認済みプラットフォーム
 
-* 
+すべて64ビットプロセッサ環境下が前提です。
+
+### デスクトップアプリケーション
+
+* Google Chrome バージョン 111.0.5563.65
+* Mozilla Firefox バージョン 110.0.1
+* Brave バージョン: 1.49.120  Chromium: 111.0.5563.64 (Official Build)
+* Opera バージョン 96.0.4693.50
+* Microsoft Edge バージョン 110.0.1587.69 (公式ビルド)
+* LibreWolf バージョン 110.0-1
+
+### モバイルアプリケーション
+
+#### Android
+
+Android 13による検証に基づきます。
+
+##### 正常に動作
+
+* Google Chrome
+* Mozilla Firefox
+
+* Brave
+* Opera
+* Microsoft Edge
+
+##### 意図しない動作
+
+* Opera mini
+  * コンテンツダウンロード不可
+* Mozilla Focus
+  * "Material Symbols and Icons - Google Fonts"が読み込まれない
