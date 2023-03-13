@@ -414,6 +414,7 @@ for (let item of quiz.subnetworkRequirementList) {
         var subnet = event.target.value;
         // 入力を整形
         subnet = subnet.replace(/[\s\.]/g, ""); // 空白とドットを削除
+        subnet = subnet.slice(0, 32); // 32ビットに切り詰める
         subnet = subnet.padEnd(32, "0"); // 32ビットになるように0で埋める
         // 2進数をドット区切り形式に整形
         subnet = subnet.match(/.{1,8}/g).join(".");
